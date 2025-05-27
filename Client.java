@@ -25,7 +25,7 @@ public class Client extends JFrame {
         add(new JScrollPane(display), BorderLayout.CENTER);
 
         inputField = new TextField();
-        checkButton = new Button("ส่งคำตอบ");
+        checkButton = new Button("Answer");
 
         JPanel bottom = new JPanel(new BorderLayout());
         bottom.add(inputField, BorderLayout.CENTER);
