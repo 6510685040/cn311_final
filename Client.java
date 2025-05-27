@@ -59,7 +59,7 @@ public class Client extends JFrame {
             read = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             write = new PrintWriter(socket.getOutputStream(), true);
     
-            System.out.println("เชื่อมต่อเซิร์ฟเวอร์สำเร็จ");
+            System.out.println("success to connect server");
     
             final String line = read.readLine();
             System.out.println(line);
@@ -80,7 +80,7 @@ public class Client extends JFrame {
             e.printStackTrace();
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    JOptionPane.showMessageDialog(Client.this, "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้: " + e.getMessage());
+                    JOptionPane.showMessageDialog(Client.this, "cannot connect server " + e.getMessage());
                 }
             });
         }
