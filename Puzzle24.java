@@ -45,7 +45,7 @@ public class Puzzle24 {
                 puzzles.add(new Puzzle(numbers));
             }
         } catch (IOException e) {
-            System.out.println("cannot rad file: " + e.getMessage());
+            System.out.println("cannot read file: " + e.getMessage());
         }
         return puzzles;
     }
