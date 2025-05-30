@@ -13,7 +13,7 @@ public class Server {
     public static boolean waitingForCardChoice = false;
     public static ClientHandler game24Winner = null;
     private static Timer gameTimer;
-    private static final int GAME24_TIMEOUT = 180000; // 3 minutes timeout
+    private static final int GAME24_TIMEOUT = 180000; 
 
     public static void newGame24() {
         game24End = false;
@@ -26,41 +26,7 @@ public class Server {
         System.out.println("Problem: " + Arrays.toString(numbers));
     }
 
-    private static void startGame24Timer() {
-        synchronized (Server.class) {
-            if (gameTimer != null) {
-                gameTimer.cancel();
-            }
-            gameTimer = new Timer();
-            gameTimer.schedule(new TimerTask() {
-                public void run() {
-                    synchronized (Server.class) {
-                        if (!game24End) {
-                            game24End = true;
-                            for (ClientHandler output : clients) {
-                                output.write.println("Times out");
-                                output.write.println("Time is up! ⏰ No one wins this round. Let's continue to game 21.");
-                            }
-                            Server.broadcastNewGame21();
-                        }
-                        gameTimer.cancel();
-                    }
-                }
-            }, GAME24_TIMEOUT);
-        }
-    }
-
-    public static void broadcastNewGame24() {
-        newGame24();
-        for (ClientHandler client : clients) {
-            client.write.println("NEW_GAME24");
-            client.write.println("Make 24 using all 4 numbers exactly once " + Arrays.toString(numbers));
-            client.write.println("You may use: +, -, *, / and ()");
-            client.write.println("Example: (2+2)*3*2");
-            client.write.println("You have only 3 minutes");
-        }
-        startGame24Timer();
-    }
+    
 
     public static void newGame21() {
         game21End = false;
@@ -323,7 +289,7 @@ public class Server {
                                 hasDrawnThisTurn = false;
                                 cardsToDrawThisTurn = 1;
                                 Game21.resetTurnState();
-                                broadcastNewGame24();
+                                sendPuzzle();
                             }
                         }
                     }, 2000);
@@ -561,7 +527,7 @@ public class Server {
                     player2Stopped = true;
                     System.out.println("Player 2 has stopped.");
                 }
-        
+                player.write.println("YOU_STOPPED");
                 for (ClientHandler client : clients) {
                     if (client != player) {
                         client.write.println("OTHER_PLAYER_STOPPED");
@@ -570,6 +536,16 @@ public class Server {
                 if (player1Stopped && player2Stopped) {
                     System.out.println("Both players stopped. Determining winner...");
                     determineWinner();
+                }
+                else {
+                    if (isPlayer1 && !player2Stopped) {
+                        player1Turn = false;
+                        player2Turn = true;
+                    } else if (!isPlayer1 && !player1Stopped) {
+                        player2Turn = false;
+                        player1Turn = true;
+                    }
+                    resetTurnState();
                 }
             }
         }
