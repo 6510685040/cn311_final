@@ -334,9 +334,6 @@ public class Server {
     }
 
     public static class Game24 {
-        static int player1score = 0;
-        static int player2score = 0;
-
 
         private static Map<Integer, Integer> getFrequencyMap(List<Integer> list) {
             Map<Integer, Integer> frequency = new HashMap<>();
@@ -449,10 +446,6 @@ public class Server {
     public static class Game21 {
         public static List<Integer> player1deck = new ArrayList<>();
         public static List<Integer> player2deck = new ArrayList<>();
-      
-
-        public static boolean player1Stopped = false;
-        public static boolean player2Stopped = false;
         public static int player1Sum = 0;
         public static int player2Sum = 0;
         public static boolean player1Turn = true;
@@ -462,7 +455,8 @@ public class Server {
         public static boolean playerWantsToStop = false;
         public static ClientHandler stoppingPlayer = null;
         public static boolean bothPlayersDrawn = false;
-    
+        public static boolean player1Stopped = false;
+        public static boolean player2Stopped = false;
 
         public static void resetGame() {
             synchronized (Server.class) {
@@ -484,41 +478,6 @@ public class Server {
                 System.out.println("New round started. All decks cleared.");
             }
         }
-        public static void handleDrawRequest(ClientHandler player) {
-            synchronized (Server.class) {
-                int card = rand.nextInt(10) + 1;
-        
-                if (player == Server.clients.get(0)) {
-                    player1deck.add(card);
-                    player1score += card;
-                } else {
-                    player2deck.add(card);
-                    player2score += card;
-                }
-        
-                // แจ้งผู้เล่นที่จั่วว่าได้ไพ่อะไร
-                player.write.println("You drew a " + card + ". Your score is now " +
-                        (player == Server.clients.get(0) ? player1score : player2score));
-        
-                // ส่งข้อมูลนี้ไปยังผู้เล่นอีกคนด้วย
-                ClientHandler opponent = (player == Server.clients.get(0)) ? Server.clients.get(1) : Server.clients.get(0);
-                opponent.write.println("Opponent drew a " + card + ".");  // <= ตรงนี้สำคัญ
-        
-                if ((player == Server.clients.get(0) && player1score > 21) ||
-                    (player == Server.clients.get(1) && player2score > 21)) {
-                    determineWinner();
-                } else {
-                    switchTurns();
-                    for (ClientHandler client : Server.clients) {
-                        if ((client == Server.clients.get(0) && !player1Stopped) ||
-                            (client == Server.clients.get(1) && !player2Stopped)) {
-                            client.write.println("YOUR_TURN");
-                        }
-                    }
-                }
-            }
-        }
-        
 
         public static void resetTurnState() {
             synchronized (Server.class) {
@@ -614,23 +573,6 @@ public class Server {
                 }
             }
         }
-        public static void revealOpponentCards(ClientHandler client) {
-            synchronized (Server.class) {
-                boolean isPlayer1 = (client == clients.get(0));
-                List<Integer> opponentDeck = isPlayer1 ? player2deck : player1deck;
-        
-                if (opponentDeck.size() <= 1) {
-                    client.write.println("OPPONENT_CARDS:[]");  
-                } else {
-                    List<Integer> revealedCards = opponentDeck.subList(1, opponentDeck.size());
-                    client.write.println("OPPONENT_CARDS:" + revealedCards);
-                }
-        
-                System.out.println("Sent opponent's cards (except first) to " + (isPlayer1 ? "P1" : "P2") +
-                    ": " + (opponentDeck.size() <= 1 ? "[]" : opponentDeck.subList(1, opponentDeck.size())));
-            }
-        }
-        
 
         private static void determineWinner() {
             synchronized (Server.class) {
